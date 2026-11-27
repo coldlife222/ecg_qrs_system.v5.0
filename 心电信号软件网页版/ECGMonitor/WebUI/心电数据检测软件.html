@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>心律监测系统 - ECG QRS Monitor v5.1</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
+  onerror="document.getElementById('chartError').style.display='block'">
+</script>
+<script>
+// Chart.js CDN 离线降级提示
+if (typeof Chart === 'undefined') {
+  document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('chartError');
+    if (el) el.style.display = 'block';
+  });
+}
+</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===== 左侧导航 ===== -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon">
+      <svg viewBox="0 0 40 40" width="40" height="40">
+        <circle cx="20" cy="20" r="18" fill="none" stroke="#4fc3f7" stroke-width="2.2"/>
+        <path d="M 8 20 Q 14 10 20 20 Q 26 30 32 20" fill="none" stroke="#4fc3f7" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <span class="logo-title">心律监测</span>
+      <span class="logo-sub">ECG Monitor</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-page="overview">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 20V10M18 20V4M6 20v-4" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="nav-label">健康概览</span>
+    </a>
+    <a href="#" class="nav-item" data-page="records">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12h4l3-8 4 16 3-8h4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="nav-label">心电记录</span>
+    </a>
+    <a href="#" class="nav-item" data-page="report">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M8 12h8M8 8h8M8 16h5" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="nav-label">健康报告</span>
+    </a>
+    <a href="#" class="nav-item" data-page="settings">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </span>
+      <span class="nav-label">设　置</span>
+    </a>
+  </nav>
+
+  <!-- 用户卡片已移除 -->
+</aside>
+
+<!-- ===== 主内容区 ===== -->
+<main class="main-content">
+
+  <!-- 页面: 健康概览 -->
+  <section class="page active" id="page-overview">
+    <div class="page-header">
+      <div>
+        <h1>健康概览</h1>
+        <span class="date-badge" id="dateDisplay"></span>
+      </div>
+      <div class="header-actions">
+        <span id="recordNav" style="display:none;display:flex;align-items:center;gap:8px;margin-right:8px;">
+          <button class="btn btn-sm btn-secondary" id="btnPrev">◀ 上一个</button>
+          <span class="text-muted" id="lblRecordIdx">1/1</span>
+          <button class="btn btn-sm btn-secondary" id="btnNext">下一个 ▶</button>
+        </span>
+        <button class="btn btn-secondary" id="btnExportReport">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          导出报告
+        </button>
+      </div>
+    </div>
+
+    <!-- 指标卡片 -->
+    <div class="metric-cards">
+      <div class="metric-card">
+        <div class="metric-icon" style="background:#e3f2fd; color:#1e88e5">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="metric-body">
+          <span class="metric-label">R波数量</span>
+          <span class="metric-value" id="metricPeaks">--</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background:#e8f5e9; color:#43a047">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </div>
+        <div class="metric-body">
+          <span class="metric-label">平均心率</span>
+          <span class="metric-value" id="metricHR">-- <span class="badge badge-green" id="hrBadge">--</span></span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background:#ede7f6; color:#7e57c2">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="2"/>
+            <path d="M7 16l3-4 3 3 4-6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="metric-body">
+          <span class="metric-label">心率标准差</span>
+          <span class="metric-value" id="metricHRStd">--</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background:#fff3e0; color:#ef6c00">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div class="metric-body">
+          <span class="metric-label">平均RR间期</span>
+          <span class="metric-value" id="metricRR">--</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background:#fce4ec; color:#e91e63">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+            <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+          </svg>
+        </div>
+        <div class="metric-body">
+          <span class="metric-label">RR变异系数</span>
+          <span class="metric-value" id="metricCV">--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ECG 波形图 -->
+    <div class="card chart-card">
+      <div class="card-header">
+        <h3>心电波形分析</h3>
+        <div class="chart-controls">
+          <label class="toggle-label">
+            <input type="checkbox" id="chkShowPeaks" checked>
+            <span>显示R波</span>
+          </label>
+          <button class="btn btn-sm btn-secondary" id="btnUndoPeak" style="display:none">↩ 撤销删除</button>
+          <select id="selTimeRange" class="select-sm">
+            <option value="all">全部</option>
+            <option value="500">前 500 采样点</option>
+            <option value="1000">前 1000 采样点</option>
+            <option value="2000">前 2000 采样点</option>
+            <option value="3000">前 3000 采样点</option>
+            <option value="5000">前 5000 采样点</option>
+            <option value="10000">前 10000 采样点</option>
+          </select>
+        </div>
+      </div>
+      <div class="card-body">
+        <canvas id="ecgChart" style="width:100%; height:280px"></canvas>
+        <div id="chartError" style="display:none;color:#dc2626;text-align:center;padding:40px">
+          图表组件加载失败，请检查网络连接后刷新页面。
+        </div>
+      </div>
+    </div>
+
+    <!-- R波位置表 + 诊断信息 并排 -->
+    <div class="bottom-row">
+      <div class="card table-card">
+        <div class="card-header">
+          <h3>R波位置</h3>
+          <span class="text-muted" id="peakCount">共 0 个</span>
+        </div>
+        <div class="table-wrap" style="max-height:280px; overflow-y:auto">
+          <table id="tblPeaks">
+            <thead><tr><th>#</th><th>采样索引</th><th>幅度</th><th>RR间期(ms)</th><th>瞬时心率(bpm)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card diagnosis-card">
+        <div class="card-header diagnosis-header">
+          <h3>诊断信息</h3>
+        </div>
+        <div class="diagnosis-body">
+          <div class="diag-row">
+            <span class="diag-label">诊断结果</span>
+            <span class="diag-value" id="diagResult">--</span>
+          </div>
+          <div class="diag-row">
+            <span class="diag-label">异常类型</span>
+            <span class="diag-value" id="diagType">--</span>
+          </div>
+          <div class="diag-row">
+            <span class="diag-label">全局类型</span>
+            <span class="diag-value" id="diagGlobal">--</span>
+          </div>
+          <div class="diag-row">
+            <span class="diag-label">推理置信度</span>
+            <span class="diag-value">
+              <div class="score-bars" id="scoreBars"></div>
+            </span>
+          </div>
+          <div class="diag-footer" id="diagConclusion">
+            <span>结论: 请加载心电数据进行分析</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页面: 心电记录 -->
+  <section class="page" id="page-records">
+    <div class="page-header">
+      <div>
+        <h1>心电记录</h1>
+        <span class="date-badge">管理您的ECG数据文件</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h3>数据文件管理</h3>
+        <div class="header-actions">
+          <button class="btn btn-primary" id="btnLoadFile">选择 CSV 文件</button>
+          <button class="btn btn-secondary" id="btnLoadDir">加载目录</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="upload-zone" id="uploadZone">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+          </svg>
+          <p>拖拽CSV文件到此处，或点击按钮选择文件</p>
+          <p class="text-muted">支持 .csv 格式的ECG采样数据</p>
+          <input type="file" id="fileInput" accept=".csv" multiple style="display:none">
+        </div>
+        <div id="fileList" class="file-list" style="display:none">
+        </div>
+        <div id="loadProgress" class="progress-bar" style="display:none">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页面: 健康报告 -->
+  <section class="page" id="page-report">
+    <div class="page-header">
+      <div>
+        <h1>健康报告</h1>
+        <span class="date-badge">AI辅助分析报告</span>
+      </div>
+    </div>
+    <!-- 批量分析汇总 -->
+    <div class="card" id="batchSummary" style="display:none">
+      <div class="card-header"><h3>批量分析汇总</h3></div>
+      <div class="card-body">
+        <div class="batch-stats" id="batchStats"></div>
+        <div class="table-wrap" style="max-height:400px; overflow-y:auto; margin-top:12px">
+          <table id="tblBatch">
+            <thead><tr>
+              <th>文件名</th><th>样本数</th><th>R波数</th><th>HR(bpm)</th>
+              <th>CV</th><th>真实标签</th><th>预测标签</th><th>正确</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>详细报告</h3></div>
+      <div class="card-body">
+        <pre id="reportContent" class="report-text">请先在心电记录页面加载数据，或加载示例数据生成报告。</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页面: 设置 -->
+  <section class="page" id="page-settings">
+    <div class="page-header">
+      <h1>设　置</h1>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>检测参数</h3></div>
+      <div class="card-body settings-grid">
+        <div class="setting-item">
+          <label>信号峰滑动平均 (SPKI Alpha)</label>
+          <input type="number" id="setSPKIAlpha" value="0.125" step="0.01" min="0.01" max="0.5">
+        </div>
+        <div class="setting-item">
+          <label>噪声峰滑动平均 (NPKI Alpha)</label>
+          <input type="number" id="setNPKIAlpha" value="0.125" step="0.01" min="0.01" max="0.5">
+        </div>
+        <div class="setting-item">
+          <label>初始阈值系数</label>
+          <input type="number" id="setThreshInit" value="0.5" step="0.05" min="0.1" max="2.0">
+        </div>
+        <div class="setting-item">
+          <label>采样率 (Hz)</label>
+          <input type="number" id="setSampleRate" value="360" step="1" min="100" max="2000">
+        </div>
+        <div class="setting-item">
+          <label>滤波窗口</label>
+          <input type="number" id="setFilterWindow" value="5" step="2" min="1" max="21">
+        </div>
+        <div class="setting-item">
+          <label>检测容忍窗口 (ms)</label>
+          <input type="number" id="setTolerance" value="150" step="10" min="50" max="500">
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-header"><h3>训练管理</h3></div>
+      <div class="card-body">
+        <p class="text-muted" style="margin-bottom:12px">统计所有已加载心电记录的R波和心率分布特征。</p>
+        <button class="btn btn-primary" id="btnRunTraining">从已加载数据中训练模型</button>
+        <button class="btn btn-secondary" id="btnDownloadAll" style="margin-left:8px">下载全部结果</button>
+        <span id="trainStatus" class="text-muted" style="margin-left:12px;cursor:pointer" title="已保存的分析结果"></span>
+        <!-- 训练结果展示 -->
+        <div id="trainResults" class="train-results" style="display:none">
+          <div class="train-stat-grid">
+            <div class="train-stat">
+              <span class="train-stat-value" id="trNormalCount">0</span>
+              <span class="train-stat-label">参与统计数</span>
+            </div>
+            <div class="train-stat">
+              <span class="train-stat-value" id="trHRMean">0</span>
+              <span class="train-stat-label">HR均值 (bpm)</span>
+            </div>
+            <div class="train-stat">
+              <span class="train-stat-value" id="trHRStd">0</span>
+              <span class="train-stat-label">HR标准差</span>
+            </div>
+            <div class="train-stat">
+              <span class="train-stat-value" id="trRRCVMean">0</span>
+              <span class="train-stat-label">RR-CV均值</span>
+            </div>
+          </div>
+          <div class="train-desc">
+            <p>统计完成！以上为所有已加载记录的心率分布特征。</p>
+            <p class="text-muted">用于后续AI推理时的高斯概率软评分计算。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="ecg_processor.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+===== ECG QRS检测与心率异常识别系统 — 报告 =====
+生成时间: 2026-11-27 19:01:16
+
+算法: Pan-Tompkins + 贝叶斯分类器
+模型: HR均值=79.26 HR标准差=11.69 RR_CV=0.0470
+
+文件                              真实标签 预测标签 正确
+----------------------------------------------
+test_000.csv                        normal       normal       Y
+test_001.csv                        normal       normal       Y
+test_002.csv                        normal       normal       Y
+test_003.csv                        normal       normal       Y
+test_004.csv                        normal       normal       Y
+test_005.csv                        normal       normal       Y
+test_006.csv                        normal       normal       Y
+test_007.csv                        normal       normal       Y
+test_008.csv                        tachycardia  tachycardia  Y
+test_009.csv                        tachycardia  tachycardia  Y
+test_010.csv                        tachycardia  tachycardia  Y
+test_011.csv                        tachycardia  tachycardia  Y
+test_012.csv                        bradycardia  bradycardia  Y
+test_013.csv                        bradycardia  bradycardia  Y
+test_014.csv                        bradycardia  bradycardia  Y
+test_015.csv                        bradycardia  bradycardia  Y
+test_016.csv                        arrhythmia   arrhythmia   Y
+test_017.csv                        arrhythmia   arrhythmia   Y
+test_018.csv                        arrhythmia   arrhythmia   Y
+test_019.csv                        arrhythmia   arrhythmia   Y
+
+========================================
+  QRS Detection Evaluation (QRS检测评估)
+----------------------------------------
+  True Pos   TP(真正例):  64
+  False Pos  FP(假正例):  0
+  False Neg  FN(假负例):  0
+  Precision  P(精确率):   1.0000  (100.0%)
+  Recall     R(召回率):   1.0000  (100.0%)
+  F1 Score   (F1分数):     1.0000
+----------------------------------------
+  Total Records (总记录):  20
+  Correct Class (正确分类): 20
+  Class Accuracy (分类准确率): 1.0000  (100.0%)
+========================================
+
+【混淆矩阵 (4×4)】
+真实↓      normal        tachy        brady        arrhy 合计
+──────────────────────────────────────────────────────────
+normal              8            0            0            0      8
+tachycardia         0            4            0            0      4
+bradycardia         0            0            4            0      4
+arrhythmia          0            0            0            4      4
+──────────────────────────────────────────────────────────
+合计              8            4            4            4     20
+
+各类别指标:
+类别         精确率 召回率       F1
+normal           100.0%   100.0%   1.000
+tachycardia      100.0%   100.0%   1.000
+bradycardia      100.0%   100.0%   1.000
+arrhythmia       100.0%   100.0%   1.000
+
+----------------------------------------------
+用户数据检测结果 (3 条)
+文件                              预测标签 心率(bpm) R波数
+----------------------------------------------
+user_int_000.csv                    normal          864.0      1
+user_int_001.csv                    normal           81.4      3
+user_int_002.csv                    normal           93.5      4

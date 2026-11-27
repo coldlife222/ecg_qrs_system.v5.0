@@ -1,0 +1,21 @@
+# split,filename,label
+test,test_000.csv,normal
+test,test_001.csv,normal
+test,test_002.csv,normal
+test,test_003.csv,normal
+test,test_004.csv,normal
+test,test_005.csv,normal
+test,test_006.csv,normal
+test,test_007.csv,normal
+test,test_008.csv,tachycardia
+test,test_009.csv,tachycardia
+test,test_010.csv,tachycardia
+test,test_011.csv,tachycardia
+test,test_012.csv,bradycardia
+test,test_013.csv,bradycardia
+test,test_014.csv,bradycardia
+test,test_015.csv,bradycardia
+test,test_016.csv,arrhythmia
+test,test_017.csv,arrhythmia
+test,test_018.csv,arrhythmia
+test,test_019.csv,arrhythmia

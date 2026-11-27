@@ -1,0 +1,4 @@
+# split,filename,label
+user,user_int_000.csv,normal
+user,user_int_001.csv,normal
+user,user_int_002.csv,normal

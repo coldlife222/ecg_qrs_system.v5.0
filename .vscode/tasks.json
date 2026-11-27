@@ -1,0 +1,91 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build ECG Test (main_test)",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-Wall",
+                "-Wextra",
+                "-std=c99",
+                "-O3",
+                "-ffast-math",
+                "-funroll-loops",
+                "-I",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/src/main_test.c",
+                "${workspaceFolder}/src/ecg_filter.c",
+                "${workspaceFolder}/src/ecg_detector.c",
+                "${workspaceFolder}/src/ecg_trainer.c",
+                "${workspaceFolder}/src/ecg_inference.c",
+                "${workspaceFolder}/src/ecg_eval.c",
+                "${workspaceFolder}/src/ecg_io.c",
+                "-o",
+                "${workspaceFolder}/ecg_test.exe",
+                "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$gcc"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build ECG Interactive (main_interactive)",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-Wall",
+                "-Wextra",
+                "-std=c99",
+                "-O3",
+                "-ffast-math",
+                "-funroll-loops",
+                "-I",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/src/main_interactive.c",
+                "${workspaceFolder}/src/ecg_filter.c",
+                "${workspaceFolder}/src/ecg_detector.c",
+                "${workspaceFolder}/src/ecg_trainer.c",
+                "${workspaceFolder}/src/ecg_inference.c",
+                "${workspaceFolder}/src/ecg_eval.c",
+                "${workspaceFolder}/src/ecg_io.c",
+                "-o",
+                "${workspaceFolder}/ecg_interactive.exe",
+                "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$gcc"],
+            "group": "build"
+        },
+        {
+            "label": "Build ECG import_user",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-Wall",
+                "-Wextra",
+                "-std=c99",
+                "-O3",
+                "-I",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/src/import_user.c",
+                "${workspaceFolder}/src/ecg_io.c",
+                "-o",
+                "${workspaceFolder}/import_user.exe",
+                "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$gcc"],
+            "group": "build"
+        }
+    ]
+}

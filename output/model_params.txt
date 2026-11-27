@@ -1,0 +1,11 @@
+# ECG Model Parameters
+is_trained=1
+trained_hr_mean=79.257459
+trained_hr_std=11.688816
+trained_rr_cv_mean=0.047024
+spki_alpha=0.125000
+npki_alpha=0.125000
+signal_peak_est=0.000000
+noise_peak_est=0.000000
+threshold1=0.000000
+threshold2=0.000000
